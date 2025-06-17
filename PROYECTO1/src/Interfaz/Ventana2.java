@@ -4,9 +4,16 @@
  */
 package Interfaz;
 
+import Codigo.Tablero;
+import java.awt.HeadlessException;
+import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 /**
  * Clase que representa la ventana de selección de partida.
- * Esta ventana permite al usuario elegir entre iniciar una nueva partida o cargar una partida existente.
+ * Esta ventana permite al usuario elegir el archivo para cargar una partida existente.
  * También incluye la opción de volver al menú principal.
  * @author edusye
  */
@@ -31,7 +38,6 @@ public class Ventana2 extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         VOLVER = new javax.swing.JButton();
-        NUEVA1 = new javax.swing.JButton();
         CARGAR = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -48,25 +54,15 @@ public class Ventana2 extends javax.swing.JFrame {
         });
         jPanel1.add(VOLVER, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 420, 50, 50));
 
-        NUEVA1.setBackground(new java.awt.Color(0, 204, 102));
-        NUEVA1.setFont(new java.awt.Font("Colonna MT", 1, 48)); // NOI18N
-        NUEVA1.setText("CARGAR PARTIDA");
-        NUEVA1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                NUEVA1MouseClicked(evt);
-            }
-        });
-        jPanel1.add(NUEVA1, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 100, -1, -1));
-
         CARGAR.setBackground(new java.awt.Color(0, 204, 102));
         CARGAR.setFont(new java.awt.Font("Colonna MT", 1, 48)); // NOI18N
-        CARGAR.setText("NUEVA PARTIDA");
+        CARGAR.setText("CARGAR ARCHIVO");
         CARGAR.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 CARGARMouseClicked(evt);
             }
         });
-        jPanel1.add(CARGAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 280, -1, -1));
+        jPanel1.add(CARGAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 210, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -97,25 +93,95 @@ public class Ventana2 extends javax.swing.JFrame {
     }//GEN-LAST:event_VOLVERMouseClicked
     
     /**
-     * Maneja el evento de clic del botón NUEVA PARTIDA.
-     * @param evt 
-    */  
-    private void NUEVA1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NUEVA1MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_NUEVA1MouseClicked
-    
-    /**
-     * Maneja el evento de clic del botón CARGAR PARTIDA.
-     * @param evt
-     */
+     * Maneja el evento de clic del botón CARGAR ARCHIVO.
+     * Abre un JFileChooser para seleccionar un archivo de texto y procesa los datos.
+     * 
+     * @param evt Evento del mouse
+     */  
     private void CARGARMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CARGARMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_CARGARMouseClicked
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "Archivos de texto (*.txt)", "txt");
+        fileChooser.setFileFilter(filter);
+        fileChooser.setDialogTitle("Seleccionar archivo de sopa de letras");
+        int resultado = fileChooser.showOpenDialog(this);
+        
+        if (resultado == JFileChooser.APPROVE_OPTION) {
+            File archivoSeleccionado = fileChooser.getSelectedFile();
+            
+            try {
+                // Crear una instancia de Tablero para procesar los datos
+                Tablero tablero = new Tablero();
+                
+                boolean cargaExitosa = tablero.cargarArchivo(archivoSeleccionado.getAbsolutePath());
+                
+                if (cargaExitosa) {
 
+                    JOptionPane.showMessageDialog(this, 
+                        "Archivo cargado exitosamente.\n" +
+                        "Tablero: " + tablero.getTamaño() + "x" + tablero.getTamaño() + "\n" +
+                        "Palabras en diccionario: " + tablero.getCantidadPalabras(),
+                        "Carga Exitosa", 
+                        JOptionPane.INFORMATION_MESSAGE);
+                    
+                    abrirVentana4(tablero);
+                    
+                    } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Error al cargar el archivo.\n" +
+                        "Verifique que el formato sea correcto:\n" +
+                        "- Diccionario entre etiquetas 'dic' y '/dic'\n" +
+                        "- Tablero entre etiquetas 'tab' y '/tab'\n" +
+                        "- 16 letras separadas por comas en el tablero",
+                        "Error de Carga", 
+                        JOptionPane.ERROR_MESSAGE);
+                }
+                
+            } catch (HeadlessException e) {
+                // Manejar cualquier excepción durante la carga
+                JOptionPane.showMessageDialog(this, 
+                    "Error inesperado al procesar el archivo:\n" + e.getMessage(),
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+            
+        } else if (resultado == JFileChooser.CANCEL_OPTION) {
+            // El usuario canceló la selección - no hacer nada
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Error al abrir el selector de archivos.",
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_CARGARMouseClicked
+    
+    /**
+     * Abre la Ventana4 (ventana del tablero) con el tablero cargado.
+     * 
+     * @param tablero instancia del tablero con los datos cargados
+     */
+    private void abrirVentana4(Tablero tablero) {
+        try {
+
+            this.setVisible(false);
+            
+            Ventana4 ventana4 = new Ventana4(tablero);
+            ventana4.setLocationRelativeTo(null);
+            ventana4.setVisible(true);
+            
+        } catch (Exception e) {
+
+            this.setVisible(true);
+            JOptionPane.showMessageDialog(this, 
+                "Error al abrir la ventana del tablero:\n" + e.getMessage(),
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton CARGAR;
-    private javax.swing.JButton NUEVA1;
     private javax.swing.JButton VOLVER;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
