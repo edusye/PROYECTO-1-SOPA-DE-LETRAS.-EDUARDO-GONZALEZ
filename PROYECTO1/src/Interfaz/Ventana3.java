@@ -46,15 +46,15 @@ public class Ventana3 extends javax.swing.JFrame {
                 VOLVERMouseClicked(evt);
             }
         });
-        jPanel1.add(VOLVER, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 420, 50, 50));
+        jPanel1.add(VOLVER, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 440, 50, 50));
 
         jTextArea1.setColumns(20);
         jTextArea1.setFont(new java.awt.Font("Colonna MT", 1, 22)); // NOI18N
         jTextArea1.setRows(5);
-        jTextArea1.setText("1-Para la formación de una palabra válida, solo se puede utilizar \nuna vez cada elemento (letra) del tablero, es decir, no se puede \nvolver a utilizar un elemento del tablero para la formación \nde la misma palabra. \n\n2-Una palabra válida debe tener al menos 3 letras.\n \n3-Una palabra válida debe existir en un diccionario. \n\n4-No todas las palabras del diccionario se encontrarán en el \ntablero. \n\n5-Las palabras no llevan acento. ");
+        jTextArea1.setText("1-Para la formación de una palabra válida, solo se puede utilizar \nuna vez cada elemento (letra) del tablero, es decir, no se puede \nvolver a utilizar un elemento del tablero para la formación \nde la misma palabra. \n\n2-Una palabra válida debe tener al menos 3 letras.\n \n3-Una palabra válida debe existir en un diccionario. \n\n4-No todas las palabras del tablero se encontrarán en el \ndiccionario. \n\n5-Las palabras no llevan acento. \n\n6-Al terminar de seleccionar las letras de la palabra da un\nsegundo click en la ultima letra para confirmar la palabra.");
         jScrollPane1.setViewportView(jTextArea1);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 640, 350));
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 640, 390));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

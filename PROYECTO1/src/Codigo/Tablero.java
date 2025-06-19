@@ -143,7 +143,7 @@ public class Tablero {
                 // Revisar las 8 direcciones alrededor
                 for (int df = -1; df <= 1; df++) {
                     for (int dc = -1; dc <= 1; dc++) {
-                        if (df == 0 && dc == 0) continue; // No conectar consigo mismo
+                        if (df == 0 && dc == 0) continue;
                         
                         int nuevaFila = fila + df;
                         int nuevaCol = col + dc;

@@ -22,8 +22,10 @@ public class Ventana4 extends javax.swing.JFrame {
     private ArrayList<Integer> seleccion;
     private ArrayList<String> encontradas;
     private ArrayList<ArrayList<Integer>> caminosEncontrados;
-    private boolean modoSeleccion; // Controla si se puede seleccionar manualmente
+    private boolean modoSeleccion; 
     private boolean palabraEncontradaEnBusqueda;
+    private ArrayList<Integer> ultimoCaminoEncontrado; 
+    private String ultimaPalabraEncontrada;
     
     /**
      * Constructor de la ventana
@@ -36,6 +38,8 @@ public class Ventana4 extends javax.swing.JFrame {
         this.caminosEncontrados = new ArrayList<>();
         this.modoSeleccion = false; 
         this.palabraEncontradaEnBusqueda = false; 
+        this.ultimoCaminoEncontrado = new ArrayList<>(); 
+        this.ultimaPalabraEncontrada = "";
         initComponents();
         configurar();
     }
@@ -97,16 +101,6 @@ public class Ventana4 extends javax.swing.JFrame {
     }
     
     /**
-     * Habilita los botones VER ARBOL y GUARDAR
-     */
-    private void habilitarBotonesEspeciales() {
-        VERARBOL.setEnabled(true);
-        GUARDAR.setEnabled(true);
-        VERARBOL.setBackground(new Color(255, 255, 153));
-        GUARDAR.setBackground(new Color(255, 255, 153));
-    }
-    
-    /**
      * Maneja el click en un botón del tablero
      * @param fila la fila del botón
      * @param col la columna del botón
@@ -142,78 +136,101 @@ public class Ventana4 extends javax.swing.JFrame {
      */
     private void verificarPalabra() {
         if (seleccion.size() < 3) {
-            JOptionPane.showMessageDialog(this, "Muy corta!");
+            JOptionPane.showMessageDialog(this, "Muy corta! La palabra debe tener al menos 3 letras.");
             limpiar();
             return;
         }
-        
+
         String palabra = "";
         for (int casilla : seleccion) {
             palabra += tablero.getLetraCasilla(casilla);
         }
         palabra = palabra.toUpperCase();
-        
-        boolean existe = false;
-        for (String p : tablero.getPalabras()) {
-            if (p.toUpperCase().equals(palabra)) {
-                existe = true;
-                break;
-            }
+
+        if (encontradas.contains(palabra)) {
+            JOptionPane.showMessageDialog(this, "Ya encontraste esta palabra: " + palabra);
+            limpiar();
+            return;
         }
-        
-        if (existe && !encontradas.contains(palabra)) {
-            encontradas.add(palabra);
-            caminosEncontrados.add(new ArrayList<>(seleccion));
-            for (int casilla : seleccion) {
-                int[] pos = tablero.getPosicion(casilla);
+
+        boolean palabraDelDiccionario = esDelDiccionario(palabra);
+
+        // Agregar la palabra a encontradas (sea del diccionario o no)
+        encontradas.add(palabra);
+        caminosEncontrados.add(new ArrayList<>(seleccion));
+        ultimoCaminoEncontrado = new ArrayList<>(seleccion); 
+        ultimaPalabraEncontrada = palabra; 
+
+        // Colorear las casillas según si es del diccionario o no
+        for (int casilla : seleccion) {
+            int[] pos = tablero.getPosicion(casilla);
+            if (palabraDelDiccionario) {
                 botonesTablero[pos[0]][pos[1]].setBackground(Color.GREEN);
+            } else {
+                botonesTablero[pos[0]][pos[1]].setBackground(Color.CYAN); 
             }
-            actualizarEncontradas();
-            JOptionPane.showMessageDialog(this, "¡Encontraste: " + palabra + "!");
-            
-            palabraEncontradaEnBusqueda = true;
-            habilitarBotonesEspeciales();
-            
-            desactivarModoSeleccion();
-            
-        } else if (encontradas.contains(palabra)) {
-            JOptionPane.showMessageDialog(this, "Ya la encontraste!");
-        } else {
-            JOptionPane.showMessageDialog(this, "No existe esa palabra");
         }
-        
+
+        // Actualizar la lista visual
+        actualizarEncontradas();
+
+        // Mostrar mensaje apropiado
+        String mensaje;
+        if (palabraDelDiccionario) {
+            mensaje = "¡Encontraste una palabra del diccionario: " + palabra + "!";
+            VERARBOL.setEnabled(true);
+            VERARBOL.setBackground(new Color(255, 255, 153));
+        } else {
+            mensaje = "¡Encontraste una palabra: " + palabra + "!\n(No está en el diccionario, pero es válida)";
+            VERARBOL.setEnabled(true);
+            GUARDAR.setEnabled(true);
+            VERARBOL.setBackground(new Color(255, 255, 153));
+            GUARDAR.setBackground(new Color(255, 255, 153));
+        }
+        JOptionPane.showMessageDialog(this, mensaje);
+
+        palabraEncontradaEnBusqueda = true;
+        desactivarModoSeleccion();
         limpiar();
     }
-    
+
     /**
      * Limpia la selección actual
      */
     private void limpiar() {
         for (int casilla : seleccion) {
-            int[] pos = tablero.getPosicion(casilla);
-            if (!botonesTablero[pos[0]][pos[1]].getBackground().equals(Color.GREEN)) {
-                botonesTablero[pos[0]][pos[1]].setBackground(Color.WHITE);
+        int[] pos = tablero.getPosicion(casilla);
+        Color colorActual = botonesTablero[pos[0]][pos[1]].getBackground();
+        
+        // Solo cambiar a blanco si no es verde (diccionario) ni cyan (palabra nueva)
+        if (!colorActual.equals(Color.GREEN) && !colorActual.equals(Color.CYAN)) {
+            botonesTablero[pos[0]][pos[1]].setBackground(Color.WHITE);
             }
         }
         seleccion.clear();
     }
-    
+
     /**
-     * Actualiza la lista de palabras encontradas
+     * Verifica si una palabra está en el diccionario del tablero
+     * @param palabra la palabra a verificar
+     * @return true si la palabra está en el diccionario, false si no
      */
-    private void actualizarEncontradas() {
-        String texto = "";
-        for (String palabra : encontradas) {
-            texto += palabra + "\n";
+    private boolean esDelDiccionario(String palabra) {
+        for (String p : tablero.getPalabras()) {
+            if (p.toUpperCase().equals(palabra.toUpperCase())) {
+                return true;
+            }
         }
-        ENCONTRADAS.setText(texto);
+        return false;
     }
+    
+
     
     /**
      * Busca todas las palabras usando DFS
      */
     private void buscarDFS() {
-         long inicio = System.currentTimeMillis();
+        long inicio = System.currentTimeMillis();
         encontradas.clear();
         caminosEncontrados.clear();
         limpiarTablero();
@@ -226,7 +243,6 @@ public class Ventana4 extends javax.swing.JFrame {
 
         long tiempo = System.currentTimeMillis() - inicio;
         
-        // Si se encontraron palabras, habilitar botones especiales
         if (!encontradas.isEmpty()) {
             palabraEncontradaEnBusqueda = true;
         }
@@ -301,7 +317,6 @@ public class Ventana4 extends javax.swing.JFrame {
         caminosEncontrados.clear();
         limpiarTablero();
         
-        // Desactivar modo selección si estaba activo
         desactivarModoSeleccion();
 
         for (String palabra : tablero.getPalabras()) {
@@ -310,7 +325,6 @@ public class Ventana4 extends javax.swing.JFrame {
 
         long tiempo = System.currentTimeMillis() - inicio;
         
-        // Si se encontraron palabras, habilitar botones especiales
         if (!encontradas.isEmpty()) {
             palabraEncontradaEnBusqueda = true;
         }
@@ -421,26 +435,40 @@ public class Ventana4 extends javax.swing.JFrame {
     }
     
     /**
-     * Muestra los resultados de la búsqueda
-     * @param metodo el método usado (DFS o BFS)
-     * @param tiempo tiempo que tardó en ms
+     * Actualiza la lista de palabras encontradas (método original)
      */
+    private void actualizarEncontradas() {
+        String texto = "";
+        for (String palabra : encontradas) {
+            texto += palabra + "\n";
+        }
+        ENCONTRADAS.setText(texto);
+    }
+    /**
+    * Muestra los resultados de la búsqueda automática (DFS o BFS)
+    * @param metodo el método usado (DFS o BFS)
+    * @param tiempo tiempo que tardó en ms
+    */
     private void mostrarResultados(String metodo, long tiempo) {
         for (ArrayList<Integer> camino : caminosEncontrados) {
-            for (int casilla : camino) {
-                int[] pos = tablero.getPosicion(casilla);
-                botonesTablero[pos[0]][pos[1]].setBackground(Color.GREEN);
-            }
+        for (int casilla : camino) {
+            int[] pos = tablero.getPosicion(casilla);
+            botonesTablero[pos[0]][pos[1]].setBackground(Color.GREEN);
         }
+    }
 
-        actualizarEncontradas();
+        actualizarEncontradas(); 
 
         String mensaje = "Método: " + metodo + "\n";
         mensaje += "Encontradas: " + encontradas.size() + "/" + tablero.getPalabras().size() + "\n";
         mensaje += "Tiempo: " + tiempo + " ms";
 
         JOptionPane.showMessageDialog(this, mensaje);
-    }  
+
+        if (!encontradas.isEmpty()) {
+            palabraEncontradaEnBusqueda = true;
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -568,6 +596,11 @@ public class Ventana4 extends javax.swing.JFrame {
         VERARBOL.setBackground(new java.awt.Color(204, 204, 204));
         VERARBOL.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         VERARBOL.setText("VER ARBOL");
+        VERARBOL.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                VERARBOLMouseClicked(evt);
+            }
+        });
         jPanel1.add(VERARBOL, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 450, -1, -1));
 
         BUSCAR.setBackground(new java.awt.Color(255, 255, 153));
@@ -610,11 +643,44 @@ public class Ventana4 extends javax.swing.JFrame {
         ventana1.setLocationRelativeTo(null);
         ventana1.setVisible(true);
     }//GEN-LAST:event_VOLVERMouseClicked
-
+    
+    /**
+     * Maneja el evento de clic del botón BUSCAR.
+     * Permite habilitar la seleccion de letras para buscar una palabra.
+     * Activa tambien los botones de VERARBOL y GUARDAR.
+     * 
+     * @param evt 
+    */
     private void BUSCARMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BUSCARMouseClicked
         // TODO add your handling code here:
         activarModoSeleccion();
     }//GEN-LAST:event_BUSCARMouseClicked
+    
+    /**
+     * Maneja el evento de clic del botón VERARBOL.
+     * Oculta la ventana actual y abre Ventana5 para ver el arbol de recorrido BFS.
+     * 
+     * @param evt 
+    */
+    private void VERARBOLMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_VERARBOLMouseClicked
+        // TODO add your handling code here:
+        if (ultimoCaminoEncontrado.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay ningún camino para mostrar.");
+            return;
+        }
+
+        try {
+            Ventana5 ventana5 = new Ventana5(ultimoCaminoEncontrado, ultimaPalabraEncontrada, tablero, this);
+            ventana5.setLocationRelativeTo(this);
+            ventana5.setVisible(true);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error al mostrar el árbol BFS: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_VERARBOLMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

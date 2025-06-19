@@ -64,7 +64,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="40" y="420" width="50" height="50"/>
+              <AbsoluteConstraints x="330" y="440" width="50" height="50"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -74,7 +74,7 @@
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="30" y="30" width="640" height="350"/>
+              <AbsoluteConstraints x="30" y="30" width="640" height="390"/>
             </Constraint>
           </Constraints>
 
@@ -87,7 +87,7 @@
                   <Font name="Colonna MT" size="22" style="1"/>
                 </Property>
                 <Property name="rows" type="int" value="5"/>
-                <Property name="text" type="java.lang.String" value="1-Para la formaci&#xf3;n de una palabra v&#xe1;lida, solo se puede utilizar &#xa;una vez cada elemento (letra) del tablero, es decir, no se puede &#xa;volver a utilizar un elemento del tablero para la formaci&#xf3;n &#xa;de la misma palabra. &#xa;&#xa;2-Una palabra v&#xe1;lida debe tener al menos 3 letras.&#xa; &#xa;3-Una palabra v&#xe1;lida debe existir en un diccionario. &#xa;&#xa;4-No todas las palabras del diccionario se encontrar&#xe1;n en el &#xa;tablero. &#xa;&#xa;5-Las palabras no llevan acento. "/>
+                <Property name="text" type="java.lang.String" value="1-Para la formaci&#xf3;n de una palabra v&#xe1;lida, solo se puede utilizar &#xa;una vez cada elemento (letra) del tablero, es decir, no se puede &#xa;volver a utilizar un elemento del tablero para la formaci&#xf3;n &#xa;de la misma palabra. &#xa;&#xa;2-Una palabra v&#xe1;lida debe tener al menos 3 letras.&#xa; &#xa;3-Una palabra v&#xe1;lida debe existir en un diccionario. &#xa;&#xa;4-No todas las palabras del tablero se encontrar&#xe1;n en el &#xa;diccionario. &#xa;&#xa;5-Las palabras no llevan acento. &#xa;&#xa;6-Al terminar de seleccionar las letras de la palabra da un&#xa;segundo click en la ultima letra para confirmar la palabra."/>
               </Properties>
             </Component>
           </SubComponents>
