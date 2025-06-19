@@ -159,7 +159,7 @@ public class Ventana1 extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
     
     /**
-     * Maneja el evento de clic del botón JUGAR.</p>
+     * Maneja el evento de clic del botón JUGAR.
      * <p>Oculta la ventana actual y abre la ventana de juego (Ventana2).</p>
      * <p>Este método se ejecuta cuando el usuario hace clic en el botón JUGAR.</p>
      * <p>Realiza la transición de la ventana principal(Ventana1) hacia la ventana de juego(Ventana2).</p>

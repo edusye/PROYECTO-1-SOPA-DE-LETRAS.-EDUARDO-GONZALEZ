@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"Interfaz","l":"Ventana4.EstadoBFS"},{"p":"Codigo","l":"Main"},{"p":"Codigo","l":"Posicion"},{"p":"Codigo","l":"Tablero"},{"p":"Interfaz","l":"Ventana1"},{"p":"Interfaz","l":"Ventana2"},{"p":"Interfaz","l":"Ventana3"},{"p":"Interfaz","l":"Ventana4"}];updateSearchResults();

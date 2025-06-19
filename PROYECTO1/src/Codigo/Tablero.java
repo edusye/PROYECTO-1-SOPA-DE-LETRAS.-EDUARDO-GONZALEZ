@@ -52,7 +52,6 @@ public class Tablero {
             while ((linea = lector.readLine()) != null) {
                 linea = linea.trim();
                 
-                // Chequear etiquetas
                 if (linea.equals("dic")) {
                     leyendoPalabras = true;
                     continue;
@@ -67,12 +66,10 @@ public class Tablero {
                     continue;
                 }
                 
-                // Leer palabras
                 if (leyendoPalabras && !linea.isEmpty()) {
                     palabrasTemp.add(linea.toUpperCase());
                 }
                 
-                // Leer tablero
                 if (leyendoTablero && !linea.isEmpty()) {
                     letrasTablero = letrasTablero + linea;
                 }
@@ -95,7 +92,6 @@ public class Tablero {
      */
     private boolean procesarDatos(ArrayList<String> listaPalabras, String letras) {
         try {
-            // Guardar palabras (solo las de 3+ letras)
             palabras.clear();
             for (String palabra : listaPalabras) {
                 if (palabra.length() >= 3) {
@@ -103,7 +99,6 @@ public class Tablero {
                 }
             }
             
-            // Procesar letras del tablero
             String[] letrasArray = letras.split(",");
             
             if (letrasArray.length != 16) {
@@ -111,7 +106,6 @@ public class Tablero {
                 return false;
             }
             
-            // Llenar el tablero
             int posicion = 0;
             for (int i = 0; i < TAMAÑO; i++) {
                 for (int j = 0; j < TAMAÑO; j++) {
@@ -120,7 +114,6 @@ public class Tablero {
                 }
             }
             
-            // Crear las conexiones del grafo
             crearConexiones();
             
             listo = true;
@@ -136,7 +129,6 @@ public class Tablero {
      * Crea las conexiones entre casillas adyacentes
      */
     private void crearConexiones() {
-        // Limpiar conexiones
         for (int i = 0; i < TOTAL_CASILLAS; i++) {
             for (int j = 0; j < TOTAL_CASILLAS; j++) {
                 conexiones[i][j] = false;

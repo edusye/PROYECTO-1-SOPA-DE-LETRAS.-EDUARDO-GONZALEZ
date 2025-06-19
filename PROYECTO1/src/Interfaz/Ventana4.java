@@ -17,64 +17,38 @@ import javax.swing.JOptionPane;
  * @author edusye
  */
 public class Ventana4 extends javax.swing.JFrame {
-    private Tablero tablero;
-    
-    // Variables para la funcionalidad del juego
+    private Tablero tablero; 
     private JButton[][] botonesTablero;
-    private ArrayList<Integer> caminoSeleccionado;
-    private ArrayList<String> palabrasEncontradas;
+    private ArrayList<Integer> seleccion;
+    private ArrayList<String> encontradas;
+    private ArrayList<ArrayList<Integer>> caminosEncontrados;
+    private boolean modoSeleccion; // Controla si se puede seleccionar manualmente
+    private boolean palabraEncontradaEnBusqueda;
     
     /**
-     * Constructor de la Ventana4.
-     * @param tablero el tablero cargado con los datos
+     * Constructor de la ventana
+     * @param tablero el tablero de la sopa de letras
      */
     public Ventana4(Tablero tablero) {
         this.tablero = tablero;
-        this.caminoSeleccionado = new ArrayList<>();
-        this.palabrasEncontradas = new ArrayList<>();
+        this.seleccion = new ArrayList<>();
+        this.encontradas = new ArrayList<>();
+        this.caminosEncontrados = new ArrayList<>();
+        this.modoSeleccion = false; 
+        this.palabraEncontradaEnBusqueda = false; 
         initComponents();
-        inicializarJuego();
+        configurar();
     }
     
     /**
-     * Inicializa el juego después de crear los componentes.
+     * Configura los botones y elementos de la ventana
      */
-    private void inicializarJuego() {
-        crearTablero();
-        mostrarPalabras();
-        configurarBotones();
-
-        PALABRAS.setEditable(false);
-        ENCONTRADAS.setEditable(false);
-        
-        // Centrar ventana
-        setLocationRelativeTo(null);
-        setTitle("Sopa de Letras - Encuentra las palabras");
-    }
-    
-    /**
-     * Crea el tablero con las letras.
-     */
-    private void crearTablero() {
+    private void configurar() {
         botonesTablero = new JButton[4][4];
-        
-        // Asignar botones
-        botonesTablero[0][0] = BOTON1A;
-        botonesTablero[0][1] = BOTON1B;
-        botonesTablero[0][2] = BOTON1C;
-        botonesTablero[0][3] = BOTON1D;
-        botonesTablero[1][0] = BOTON2A;
-        botonesTablero[1][1] = BOTON2B;
-        botonesTablero[1][2] = BOTON2C;
-        botonesTablero[1][3] = BOTON2D;
-        botonesTablero[2][0] = BOTON3A;
-        botonesTablero[2][1] = BOTON3B;
-        botonesTablero[2][2] = BOTON3C;
-        botonesTablero[2][3] = BOTON3D;
-        botonesTablero[3][0] = BOTON4A;
-        botonesTablero[3][1] = BOTON4B;
-        botonesTablero[3][2] = BOTON4C;
-        botonesTablero[3][3] = BOTON4D;
+        botonesTablero[0][0] = BOTON1A; botonesTablero[0][1] = BOTON1B; botonesTablero[0][2] = BOTON1C; botonesTablero[0][3] = BOTON1D;
+        botonesTablero[1][0] = BOTON2A; botonesTablero[1][1] = BOTON2B; botonesTablero[1][2] = BOTON2C; botonesTablero[1][3] = BOTON2D;
+        botonesTablero[2][0] = BOTON3A; botonesTablero[2][1] = BOTON3B; botonesTablero[2][2] = BOTON3C; botonesTablero[2][3] = BOTON3D;
+        botonesTablero[3][0] = BOTON4A; botonesTablero[3][1] = BOTON4B; botonesTablero[3][2] = BOTON4C; botonesTablero[3][3] = BOTON4D;
         
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -82,164 +56,391 @@ public class Ventana4 extends javax.swing.JFrame {
                 boton.setText(String.valueOf(tablero.getLetra(i, j)));
                 boton.setFont(new Font("Colonna MT", Font.BOLD, 18));
                 boton.setBackground(Color.WHITE);
-
                 boton.setFocusPainted(false);
-
                 final int fila = i;
                 final int col = j;
                 boton.addActionListener((ActionEvent e) -> {
-                    clickCasilla(fila, col);
+                    clickBoton(fila, col);
                 });
             }
         }
-    }
-    
-    /**
-     * Muestra las palabras a encontrar.
-     */
-    private void mostrarPalabras() {
-        String texto = "";
-        ArrayList<String> palabras = tablero.getPalabras();
         
-        for (int i = 0; i < palabras.size(); i++) {
-            texto += palabras.get(i).toUpperCase();
-            if (i < palabras.size() - 1) {
-                texto += "\n";
-            }
+        String texto = "";
+        for (String palabra : tablero.getPalabras()) {
+            texto += palabra.toUpperCase() + "\n";
         }
         PALABRAS.setText(texto);
+
+        LIMPIAR.addActionListener(e -> limpiar());
+        DFS.addActionListener(e -> buscarDFS());
+        BFS.addActionListener(e -> buscarBFS());
+        VERARBOL.setEnabled(false);
+        GUARDAR.setEnabled(false);
     }
     
-    /**
-     * Configura los botones de la interfaz.
-     */
-    private void configurarBotones() {
-        LIMPIAR.addActionListener((ActionEvent e) -> {
-            limpiarTodo();
-        });
+    private void activarModoSeleccion() {
+        modoSeleccion = true;
+        JOptionPane.showMessageDialog(this, "Modo de búsqueda activado. Ahora puedes seleccionar letras en el tablero.");
         
-        VOLVER.addActionListener((ActionEvent e) -> {
-            regresarVentana();
-        });
+        BUSCAR.setBackground(Color.ORANGE);
+        BUSCAR.setText("ACTIVO");
     }
     
     /**
-     * Maneja cuando se hace click en una casilla.
+     * Desactiva el modo de selección manual
      */
-    private void clickCasilla(int fila, int col) {
+    private void desactivarModoSeleccion() {
+        modoSeleccion = false;
+        BUSCAR.setBackground(new Color(255, 255, 153));
+        BUSCAR.setText("BUSCAR");
+        limpiar();
+    }
+    
+    /**
+     * Habilita los botones VER ARBOL y GUARDAR
+     */
+    private void habilitarBotonesEspeciales() {
+        VERARBOL.setEnabled(true);
+        GUARDAR.setEnabled(true);
+        VERARBOL.setBackground(new Color(255, 255, 153));
+        GUARDAR.setBackground(new Color(255, 255, 153));
+    }
+    
+    /**
+     * Maneja el click en un botón del tablero
+     * @param fila la fila del botón
+     * @param col la columna del botón
+     */
+    private void clickBoton(int fila, int col) {
+        if (!modoSeleccion) {
+            JOptionPane.showMessageDialog(this, "Debes presionar el botón BUSCAR primero para poder seleccionar letras.");
+            return;
+        }
+        
         int casilla = tablero.getCasilla(fila, col);
         
-        if (caminoSeleccionado.isEmpty()) {
-            caminoSeleccionado.add(casilla);
+        if (seleccion.isEmpty()) {
+            seleccion.add(casilla);
             botonesTablero[fila][col].setBackground(Color.YELLOW);
-        } else {
-            if (caminoSeleccionado.contains(casilla)) {
-                if (caminoSeleccionado.get(caminoSeleccionado.size() - 1) == casilla) {
-                    verificarPalabra();
-                }
-                return;
+        } else if (seleccion.contains(casilla)) {
+            if (seleccion.get(seleccion.size() - 1) == casilla) {
+                verificarPalabra();
             }
-            
-            int ultimaCasilla = caminoSeleccionado.get(caminoSeleccionado.size() - 1);
-            if (tablero.estanConectadas(ultimaCasilla, casilla)) {
-                caminoSeleccionado.add(casilla);
+        } else {
+            int ultima = seleccion.get(seleccion.size() - 1);
+            if (tablero.estanConectadas(ultima, casilla)) {
+                seleccion.add(casilla);
                 botonesTablero[fila][col].setBackground(Color.YELLOW);
             } else {
-                JOptionPane.showMessageDialog(this, "Las casillas deben estar conectadas!");
+                JOptionPane.showMessageDialog(this, "Casillas no conectadas!");
             }
         }
     }
     
     /**
-     * Verifica si la palabra formada es correcta.
+     * Verifica si la palabra seleccionada existe en el tablero
      */
     private void verificarPalabra() {
-        if (caminoSeleccionado.size() < 3) {
-            JOptionPane.showMessageDialog(this, "Las palabras deben tener al menos 3 letras.");
-            limpiarTodo();
+        if (seleccion.size() < 3) {
+            JOptionPane.showMessageDialog(this, "Muy corta!");
+            limpiar();
             return;
         }
         
         String palabra = "";
-        for (int casilla : caminoSeleccionado) {
+        for (int casilla : seleccion) {
             palabra += tablero.getLetraCasilla(casilla);
         }
+        palabra = palabra.toUpperCase();
         
-        String palabraFormada = palabra.toUpperCase();
-        boolean encontrada = false;
-        for (String palabraTablero : tablero.getPalabras()) {
-            if (palabraTablero.toUpperCase().equals(palabraFormada)) {
-                encontrada = true;
+        boolean existe = false;
+        for (String p : tablero.getPalabras()) {
+            if (p.toUpperCase().equals(palabra)) {
+                existe = true;
                 break;
             }
         }
         
-        if (encontrada) {
-            if (!palabrasEncontradas.contains(palabraFormada)) {
-                palabrasEncontradas.add(palabraFormada);
-                marcarPalabraVerde();
-                actualizarEncontradas();
-                JOptionPane.showMessageDialog(this, "¡Palabra encontrada: " + palabraFormada + "!");
-                
-                if (palabrasEncontradas.size() == tablero.getPalabras().size()) {
-                    JOptionPane.showMessageDialog(this, "¡Felicitaciones! Has encontrado todas las palabras.");
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Ya encontraste esta palabra: " + palabraFormada);
+        if (existe && !encontradas.contains(palabra)) {
+            encontradas.add(palabra);
+            caminosEncontrados.add(new ArrayList<>(seleccion));
+            for (int casilla : seleccion) {
+                int[] pos = tablero.getPosicion(casilla);
+                botonesTablero[pos[0]][pos[1]].setBackground(Color.GREEN);
             }
+            actualizarEncontradas();
+            JOptionPane.showMessageDialog(this, "¡Encontraste: " + palabra + "!");
+            
+            palabraEncontradaEnBusqueda = true;
+            habilitarBotonesEspeciales();
+            
+            desactivarModoSeleccion();
+            
+        } else if (encontradas.contains(palabra)) {
+            JOptionPane.showMessageDialog(this, "Ya la encontraste!");
         } else {
-            JOptionPane.showMessageDialog(this, "La palabra '" + palabraFormada + "' no está en el diccionario.");
+            JOptionPane.showMessageDialog(this, "No existe esa palabra");
         }
         
-        limpiarTodo();
+        limpiar();
     }
     
     /**
-     * Marca la palabra encontrada en verde.
+     * Limpia la selección actual
      */
-    private void marcarPalabraVerde() {
-        for (int casilla : caminoSeleccionado) {
-            int[] pos = tablero.getPosicion(casilla);
-            botonesTablero[pos[0]][pos[1]].setBackground(Color.GREEN);
-        }
-    }
-    
-    /**
-     * Limpia la selección actual.
-     */
-    private void limpiarTodo() {
-        for (int casilla : caminoSeleccionado) {
+    private void limpiar() {
+        for (int casilla : seleccion) {
             int[] pos = tablero.getPosicion(casilla);
             if (!botonesTablero[pos[0]][pos[1]].getBackground().equals(Color.GREEN)) {
                 botonesTablero[pos[0]][pos[1]].setBackground(Color.WHITE);
             }
         }
-        caminoSeleccionado.clear();
+        seleccion.clear();
     }
     
     /**
-     * Actualiza las palabras encontradas.
+     * Actualiza la lista de palabras encontradas
      */
     private void actualizarEncontradas() {
         String texto = "";
-        for (int i = 0; i < palabrasEncontradas.size(); i++) {
-            texto += palabrasEncontradas.get(i);
-            if (i < palabrasEncontradas.size() - 1) {
-                texto += "\n";
-            }
+        for (String palabra : encontradas) {
+            texto += palabra + "\n";
         }
         ENCONTRADAS.setText(texto);
     }
     
     /**
-     * Regresa a la ventana anterior.
+     * Busca todas las palabras usando DFS
      */
-    private void regresarVentana() {
-        this.dispose();
-        Ventana1 ventana1 = new Ventana1();
-        ventana1.setLocationRelativeTo(null);
-        ventana1.setVisible(true);
+    private void buscarDFS() {
+         long inicio = System.currentTimeMillis();
+        encontradas.clear();
+        caminosEncontrados.clear();
+        limpiarTablero();
+        
+        desactivarModoSeleccion();
+        
+        for (String palabra : tablero.getPalabras()) {
+            buscarPalabraDFS(palabra.toUpperCase());
+        }
+
+        long tiempo = System.currentTimeMillis() - inicio;
+        
+        // Si se encontraron palabras, habilitar botones especiales
+        if (!encontradas.isEmpty()) {
+            palabraEncontradaEnBusqueda = true;
+        }
+        
+        mostrarResultados("DFS", tiempo);
     }
+    
+    /**
+     * Busca una palabra específica usando DFS
+     * @param palabra la palabra a buscar
+     */
+    private void buscarPalabraDFS(String palabra) {
+        for (int i = 0; i < 4 && !encontradas.contains(palabra); i++) {
+            for (int j = 0; j < 4 && !encontradas.contains(palabra); j++) {
+                boolean[][] visitado = new boolean[4][4];
+                ArrayList<Integer> camino = new ArrayList<>();
+                if (dfs(i, j, palabra, 0, visitado, camino)) {
+                    encontradas.add(palabra);
+                    caminosEncontrados.add(new ArrayList<>(camino));
+                }
+            }
+        }
+    }
+    
+    /**
+     * Método recursivo para DFS
+     * @param fila fila actual
+     * @param col columna actual
+     * @param palabra palabra que se busca
+     * @param pos posición en la palabra
+     * @param visitado matriz de casillas visitadas
+     * @param camino camino actual
+     * @return true si encuentra la palabra
+     */
+    private boolean dfs(int fila, int col, String palabra, int pos, boolean[][] visitado, ArrayList<Integer> camino) {
+        if (fila < 0 || fila >= 4 || col < 0 || col >= 4 || visitado[fila][col]) {
+            return false;
+        }
+        if (tablero.getLetra(fila, col) != palabra.charAt(pos)) {
+            return false;
+        }
+        
+        visitado[fila][col] = true;
+        camino.add(tablero.getCasilla(fila, col));
+        
+        if (pos == palabra.length() - 1) {
+            return true;
+        }
+        
+        // Buscar en 8 direcciones
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i != 0 || j != 0) {
+                    if (dfs(fila + i, col + j, palabra, pos + 1, visitado, camino)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        visitado[fila][col] = false;
+        camino.remove(camino.size() - 1);
+        return false;
+    }
+    
+    /**
+     * Busca todas las palabras usando BFS
+     */
+    private void buscarBFS() {
+        long inicio = System.currentTimeMillis();
+        encontradas.clear();
+        caminosEncontrados.clear();
+        limpiarTablero();
+        
+        // Desactivar modo selección si estaba activo
+        desactivarModoSeleccion();
+
+        for (String palabra : tablero.getPalabras()) {
+            buscarPalabraBFS(palabra.toUpperCase());
+        }
+
+        long tiempo = System.currentTimeMillis() - inicio;
+        
+        // Si se encontraron palabras, habilitar botones especiales
+        if (!encontradas.isEmpty()) {
+            palabraEncontradaEnBusqueda = true;
+        }
+        
+        mostrarResultados("BFS", tiempo);
+    }
+    
+    /**
+     * Busca una palabra específica usando BFS
+     * @param palabra la palabra a buscar
+     */
+    private void buscarPalabraBFS(String palabra) {
+        for (int i = 0; i < 4 && !encontradas.contains(palabra); i++) {
+            for (int j = 0; j < 4 && !encontradas.contains(palabra); j++) {
+                if (tablero.getLetra(i, j) == palabra.charAt(0)) {
+                    ArrayList<Integer> camino = bfsEncontrarPalabra(i, j, palabra);
+                    if (camino != null) {
+                        encontradas.add(palabra);
+                        caminosEncontrados.add(camino);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Encuentra una palabra usando BFS
+     * @param filaInicial fila donde empieza
+     * @param colInicial columna donde empieza
+     * @param palabra palabra a buscar
+     * @return el camino si encuentra la palabra, null si no
+     */
+    private ArrayList<Integer> bfsEncontrarPalabra(int filaInicial, int colInicial, String palabra) {
+        ArrayList<EstadoBFS> cola = new ArrayList<>();
+        
+        ArrayList<Integer> caminoInicial = new ArrayList<>();
+        caminoInicial.add(tablero.getCasilla(filaInicial, colInicial));
+        boolean[][] visitadoInicial = new boolean[4][4];
+        visitadoInicial[filaInicial][colInicial] = true;
+        
+        cola.add(new EstadoBFS(filaInicial, colInicial, 1, caminoInicial, visitadoInicial));
+        
+        while (!cola.isEmpty()) {
+            EstadoBFS actual = cola.remove(0);
+            
+            if (actual.indice == palabra.length()) {
+                return actual.camino;
+            }
+            
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) continue;
+                    
+                    int nuevaFila = actual.fila + i;
+                    int nuevaCol = actual.col + j;
+                    
+                    if (nuevaFila >= 0 && nuevaFila < 4 && nuevaCol >= 0 && nuevaCol < 4 
+                        && !actual.visitado[nuevaFila][nuevaCol]) {
+                        
+                        if (tablero.getLetra(nuevaFila, nuevaCol) == palabra.charAt(actual.indice)) {
+                            ArrayList<Integer> nuevoCamino = new ArrayList<>(actual.camino);
+                            nuevoCamino.add(tablero.getCasilla(nuevaFila, nuevaCol));
+                            
+                            boolean[][] nuevoVisitado = new boolean[4][4];
+                            for (int x = 0; x < 4; x++) {
+                                for (int y = 0; y < 4; y++) {
+                                    nuevoVisitado[x][y] = actual.visitado[x][y];
+                                }
+                            }
+                            nuevoVisitado[nuevaFila][nuevaCol] = true;
+                            
+                            cola.add(new EstadoBFS(nuevaFila, nuevaCol, actual.indice + 1, 
+                                                 nuevoCamino, nuevoVisitado));
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Clase para guardar el estado en BFS
+     */
+    private class EstadoBFS {
+        int fila, col, indice;
+        ArrayList<Integer> camino;
+        boolean[][] visitado;
+        
+        EstadoBFS(int fila, int col, int indice, ArrayList<Integer> camino, boolean[][] visitado) {
+            this.fila = fila;
+            this.col = col;
+            this.indice = indice;
+            this.camino = camino;
+            this.visitado = visitado;
+        }
+    }
+    
+    /**
+     * Limpia todos los colores del tablero
+     */
+    private void limpiarTablero() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                botonesTablero[i][j].setBackground(Color.WHITE);
+            }
+        }
+    }
+    
+    /**
+     * Muestra los resultados de la búsqueda
+     * @param metodo el método usado (DFS o BFS)
+     * @param tiempo tiempo que tardó en ms
+     */
+    private void mostrarResultados(String metodo, long tiempo) {
+        for (ArrayList<Integer> camino : caminosEncontrados) {
+            for (int casilla : camino) {
+                int[] pos = tablero.getPosicion(casilla);
+                botonesTablero[pos[0]][pos[1]].setBackground(Color.GREEN);
+            }
+        }
+
+        actualizarEncontradas();
+
+        String mensaje = "Método: " + metodo + "\n";
+        mensaje += "Encontradas: " + encontradas.size() + "/" + tablero.getPalabras().size() + "\n";
+        mensaje += "Tiempo: " + tiempo + " ms";
+
+        JOptionPane.showMessageDialog(this, mensaje);
+    }  
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -251,7 +452,6 @@ public class Ventana4 extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
         TABLERO = new javax.swing.JPanel();
         BOTON1A = new javax.swing.JButton();
         BOTON1B = new javax.swing.JButton();
@@ -269,9 +469,9 @@ public class Ventana4 extends javax.swing.JFrame {
         BOTON4B = new javax.swing.JButton();
         BOTON4C = new javax.swing.JButton();
         BOTON4D = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        P = new javax.swing.JScrollPane();
         PALABRAS = new javax.swing.JTextArea();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        E = new javax.swing.JScrollPane();
         ENCONTRADAS = new javax.swing.JTextArea();
         ENC = new javax.swing.JLabel();
         PAL = new javax.swing.JLabel();
@@ -279,16 +479,14 @@ public class Ventana4 extends javax.swing.JFrame {
         VOLVER = new javax.swing.JButton();
         BFS = new javax.swing.JButton();
         DFS = new javax.swing.JButton();
-        AGREGAR = new javax.swing.JButton();
+        GUARDAR = new javax.swing.JButton();
         VERARBOL = new javax.swing.JButton();
+        BUSCAR = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(153, 204, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jPanel3.setLayout(new java.awt.GridLayout(4, 4, 4, 0));
-        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 170, -1, -1));
 
         TABLERO.setLayout(new java.awt.GridLayout(4, 4, 1, 1));
         TABLERO.add(BOTON1A);
@@ -308,49 +506,80 @@ public class Ventana4 extends javax.swing.JFrame {
         TABLERO.add(BOTON4C);
         TABLERO.add(BOTON4D);
 
-        jPanel1.add(TABLERO, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, 400, 380));
+        jPanel1.add(TABLERO, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 400, 380));
 
         PALABRAS.setColumns(20);
         PALABRAS.setFont(new java.awt.Font("Colonna MT", 1, 14)); // NOI18N
         PALABRAS.setRows(5);
-        jScrollPane1.setViewportView(PALABRAS);
+        P.setViewportView(PALABRAS);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 90, -1, 130));
+        jPanel1.add(P, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 60, 240, 130));
 
         ENCONTRADAS.setColumns(20);
         ENCONTRADAS.setFont(new java.awt.Font("Colonna MT", 1, 14)); // NOI18N
         ENCONTRADAS.setRows(5);
-        jScrollPane2.setViewportView(ENCONTRADAS);
+        E.setViewportView(ENCONTRADAS);
 
-        jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 260, -1, 130));
+        jPanel1.add(E, new org.netbeans.lib.awtextra.AbsoluteConstraints(444, 240, 240, 130));
 
         ENC.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         ENC.setText("PALABRAS ENCONTRADAS");
-        jPanel1.add(ENC, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 230, 230, -1));
+        jPanel1.add(ENC, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 220, 230, -1));
 
         PAL.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         PAL.setText("PALABRAS ");
-        jPanel1.add(PAL, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 60, 120, -1));
+        jPanel1.add(PAL, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 40, 120, -1));
 
         LIMPIAR.setBackground(new java.awt.Color(255, 255, 153));
+        LIMPIAR.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         LIMPIAR.setText("LIMPIAR");
-        jPanel1.add(LIMPIAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 400, 90, 30));
+        LIMPIAR.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jPanel1.add(LIMPIAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 380, 110, 30));
 
         VOLVER.setBackground(new java.awt.Color(255, 102, 102));
+        VOLVER.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         VOLVER.setText("VOLVER");
-        jPanel1.add(VOLVER, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 400, 90, 30));
+        VOLVER.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        VOLVER.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                VOLVERMouseClicked(evt);
+            }
+        });
+        jPanel1.add(VOLVER, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 380, 110, 30));
 
+        BFS.setBackground(new java.awt.Color(255, 255, 153));
+        BFS.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         BFS.setText("BFS");
+        BFS.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jPanel1.add(BFS, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 450, -1, -1));
 
+        DFS.setBackground(new java.awt.Color(255, 255, 153));
+        DFS.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         DFS.setText("DFS");
+        DFS.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jPanel1.add(DFS, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 450, -1, -1));
 
-        AGREGAR.setText("AGREGAR");
-        jPanel1.add(AGREGAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 450, -1, -1));
+        GUARDAR.setBackground(new java.awt.Color(204, 204, 204));
+        GUARDAR.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
+        GUARDAR.setText("GUARDAR");
+        GUARDAR.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jPanel1.add(GUARDAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 450, -1, -1));
 
+        VERARBOL.setBackground(new java.awt.Color(204, 204, 204));
+        VERARBOL.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         VERARBOL.setText("VER ARBOL");
-        jPanel1.add(VERARBOL, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 450, -1, -1));
+        jPanel1.add(VERARBOL, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 450, -1, -1));
+
+        BUSCAR.setBackground(new java.awt.Color(255, 255, 153));
+        BUSCAR.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
+        BUSCAR.setText("BUSCAR");
+        BUSCAR.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        BUSCAR.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BUSCARMouseClicked(evt);
+            }
+        });
+        jPanel1.add(BUSCAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 450, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -363,12 +592,32 @@ public class Ventana4 extends javax.swing.JFrame {
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
         );
 
+        jPanel1.getAccessibleContext().setAccessibleDescription("panel azul");
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Maneja el evento de clic del botón VOLVER.
+     * Oculta la ventana actual y regresa al menú principal (Ventana1).
+     * 
+     * @param evt 
+    */
+    private void VOLVERMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_VOLVERMouseClicked
+        // TODO add your handling code here:
+        this.dispose();
+        Ventana1 ventana1 = new Ventana1();
+        ventana1.setLocationRelativeTo(null);
+        ventana1.setVisible(true);
+    }//GEN-LAST:event_VOLVERMouseClicked
+
+    private void BUSCARMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BUSCARMouseClicked
+        // TODO add your handling code here:
+        activarModoSeleccion();
+    }//GEN-LAST:event_BUSCARMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton AGREGAR;
     private javax.swing.JButton BFS;
     private javax.swing.JButton BOTON1A;
     private javax.swing.JButton BOTON1B;
@@ -386,18 +635,19 @@ public class Ventana4 extends javax.swing.JFrame {
     private javax.swing.JButton BOTON4B;
     private javax.swing.JButton BOTON4C;
     private javax.swing.JButton BOTON4D;
+    private javax.swing.JButton BUSCAR;
     private javax.swing.JButton DFS;
+    private javax.swing.JScrollPane E;
     private javax.swing.JLabel ENC;
     private javax.swing.JTextArea ENCONTRADAS;
+    private javax.swing.JButton GUARDAR;
     private javax.swing.JButton LIMPIAR;
+    private javax.swing.JScrollPane P;
     private javax.swing.JLabel PAL;
     private javax.swing.JTextArea PALABRAS;
     private javax.swing.JPanel TABLERO;
     private javax.swing.JButton VERARBOL;
     private javax.swing.JButton VOLVER;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }
