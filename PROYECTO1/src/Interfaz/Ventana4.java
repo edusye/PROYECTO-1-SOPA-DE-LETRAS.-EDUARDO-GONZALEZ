@@ -531,7 +531,7 @@ public class Ventana4 extends javax.swing.JFrame {
     }
     
     /**
-     * Actualiza la lista de palabras encontradas (método original)
+     * Actualiza la lista de palabras encontradas
      */
     private void actualizarEncontradas() {
         String texto = "";
