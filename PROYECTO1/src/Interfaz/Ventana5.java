@@ -20,13 +20,13 @@ import org.graphstream.ui.view.Viewer;
  * Ventana que muestra el arbol de recorrido bfs de la palabra seleccionada manualmente.
  * @author edusye
  */
-public class Ventana5 extends javax.swing.JFrame {
-    private ArrayList<Integer> camino;
+public class Ventana5 extends javax.swing.JFrame {  
+    private ArrayList<Integer> camino; // Declara una lista para almacenar el camino encontrado por BFS.   
+    private Tablero tablero; // Declara una instancia de la clase Tablero.
+    private Graph grafo; // Declara una instancia de la clase Grafo.
+    private Viewer viewer; // Declara una instancia Viewer.
+    private Ventana4 ventanaPadre; // Declara una instancia de Ventana4.
 
-    private Tablero tablero;
-    private Graph grafo;
-    private Viewer viewer;
-    private Ventana4 ventanaPadre;
     
     /**
      * Constructor que recibe el camino, palabra y tablero

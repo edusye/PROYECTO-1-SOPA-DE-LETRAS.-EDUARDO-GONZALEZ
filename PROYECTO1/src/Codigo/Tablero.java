@@ -16,14 +16,12 @@ import java.util.*;
  * @author estudiante
  */
 public class Tablero {
-    
-    private static final int TAMAÑO = 4;
-    private static final int TOTAL_CASILLAS = TAMAÑO * TAMAÑO;
-    
-    private char[][] tablero;
-    private boolean[][] conexiones;
-    private ArrayList<String> palabras;
-    private boolean listo;
+    private static final int TAMAÑO = 4; //Declara el tamaño del tablero.
+    private static final int TOTAL_CASILLAS = TAMAÑO * TAMAÑO; //Declara la cantidad de casillas.
+    private char[][] tablero; // Declara una matriz bidimensional de caracteres que sera el tablero.
+    private boolean[][] conexiones;   // Declara otra matriz bidimensional para registrar las conexiones entre casillas.
+    private ArrayList<String> palabras; // Declara una lista para almacenar las palabras.
+    private boolean listo;  // Declara un boolean para indicar un estado de "listo"
     
     /**
      * Constructor del tablero
@@ -135,12 +133,10 @@ public class Tablero {
             }
         }
         
-        // Conecta casillas vecinas
         for (int fila = 0; fila < TAMAÑO; fila++) {
             for (int col = 0; col < TAMAÑO; col++) {
                 int casilla = fila * TAMAÑO + col;
                 
-                // Revisar las 8 direcciones alrededor
                 for (int df = -1; df <= 1; df++) {
                     for (int dc = -1; dc <= 1; dc++) {
                         if (df == 0 && dc == 0) continue;
@@ -148,7 +144,6 @@ public class Tablero {
                         int nuevaFila = fila + df;
                         int nuevaCol = col + dc;
                         
-                        // Verifica que esté dentro del tablero
                         if (nuevaFila >= 0 && nuevaFila < TAMAÑO && 
                             nuevaCol >= 0 && nuevaCol < TAMAÑO) {
                             

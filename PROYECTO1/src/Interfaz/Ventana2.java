@@ -139,7 +139,6 @@ public class Ventana2 extends javax.swing.JFrame {
                 }
                 
             } catch (HeadlessException e) {
-                // Maneja cualquier excepción durante la carga
                 JOptionPane.showMessageDialog(this, 
                     "Error inesperado al procesar el archivo:\n" + e.getMessage(),
                     "Error", 

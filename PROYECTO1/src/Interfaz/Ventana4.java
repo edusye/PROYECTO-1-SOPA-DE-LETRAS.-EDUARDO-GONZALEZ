@@ -21,17 +21,17 @@ import java.io.File;
  * @author edusye
  */
 public class Ventana4 extends javax.swing.JFrame {
-    private Tablero tablero; 
-    private JButton[][] botonesTablero;
-    private ArrayList<Integer> seleccion;
-    private ArrayList<String> encontradas;
-    private ArrayList<ArrayList<Integer>> caminosEncontrados;
-    private boolean modoSeleccion; 
-    private boolean palabraEncontradaEnBusqueda;
-    private ArrayList<Integer> ultimoCaminoEncontrado; 
-    private String ultimaPalabraEncontrada;
-    private ArrayList<String> palabrasNoEnDiccionario;
-    private String rutaArchivoDatos;
+    private Tablero tablero;  // Declara una instancia de la clase Tablero.
+    private JButton[][] botonesTablero; // Declara una matriz bidimensional para crear los botones que haran de casillas.
+    private ArrayList<Integer> seleccion; // Declara una lista de enteros para almacenar la selección actual del usuario en el tablero.
+    private ArrayList<String> encontradas; // Declara una lista para guardar las palabras que ya han sido encontradas por el jugador o el sistema.
+    private ArrayList<ArrayList<Integer>> caminosEncontrados; // Declara una lista de listas de enteros para almacenar todos los caminos válidos que se han encontrado en el tablero.
+    private boolean modoSeleccion; // Declara una boolean para indicar si el modo de selección de letras está activo o no.
+    private boolean palabraEncontradaEnBusqueda; // Declara un boolean para guardar una palabra encontrada en el modo busqueda.
+    private ArrayList<Integer> ultimoCaminoEncontrado; // Declara una lista para almacenar el último camino valido.
+    private String ultimaPalabraEncontrada;  // Declara una cadena para almacenar la última palabra que fue encontrada.
+    private ArrayList<String> palabrasNoEnDiccionario; // Declara una lista  para almacenar palabras que no se encontraron en el diccionario.
+    private String rutaArchivoDatos; // Declara una cadena que guarda la ruta al archivo donde se almacenara la nueva palabra.    
     
     /**
      * Constructor de la ventana

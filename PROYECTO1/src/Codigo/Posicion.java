@@ -9,8 +9,8 @@ package Codigo;
  * @author edusye
  */
 public class Posicion {
-    private int fila;
-    private int columna;
+    private int fila; //Declara la cantidad de filas
+    private int columna; //Declara la cantidad de columnas
     
     /**
      * Constructor con fila y columna.
@@ -55,8 +55,6 @@ public class Posicion {
         
         int difFila = Math.abs(this.fila - otra.fila);
         int difColumna = Math.abs(this.columna - otra.columna);
-        
-        // Son adyacentes si están máximo a 1 casilla de distancia
         return (difFila <= 1 && difColumna <= 1) && 
                !(difFila == 0 && difColumna == 0);
     }
