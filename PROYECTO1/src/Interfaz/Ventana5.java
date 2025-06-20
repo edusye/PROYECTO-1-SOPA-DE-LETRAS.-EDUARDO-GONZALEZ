@@ -15,8 +15,9 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swing_viewer.SwingViewer;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
+
 /**
- *
+ * Ventana que muestra el arbol de recorrido bfs de la palabra seleccionada manualmente.
  * @author edusye
  */
 public class Ventana5 extends javax.swing.JFrame {
@@ -157,7 +158,14 @@ public class Ventana5 extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
+    
+    /**
+     * Maneja el evento de clic del botón VOLVER.
+     * Oculta la ventana actual y regresa a Ventana4.
+     * 
+     * @param evt 
+    */
     private void VOLVERMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_VOLVERMouseClicked
         // TODO add your handling code here:
         if (ventanaPadre != null) {

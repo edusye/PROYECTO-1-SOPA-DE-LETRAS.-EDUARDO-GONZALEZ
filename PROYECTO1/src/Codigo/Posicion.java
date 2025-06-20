@@ -37,7 +37,7 @@ public class Posicion {
         this.columna = indiceNodo % 4;
     }
     
-     /**
+    /**
      * Convierte la posición a índice de nodo.
      * @return El índice del nodo (0-15)
      */

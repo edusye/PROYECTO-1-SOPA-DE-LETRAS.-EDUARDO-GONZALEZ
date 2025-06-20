@@ -111,7 +111,7 @@ public class Ventana2 extends javax.swing.JFrame {
             File archivoSeleccionado = fileChooser.getSelectedFile();
             
             try {
-                // Crear una instancia de Tablero para procesar los datos
+                // Crea una instancia de Tablero para procesar los datos
                 Tablero tablero = new Tablero();
                 
                 boolean cargaExitosa = tablero.cargarArchivo(archivoSeleccionado.getAbsolutePath());
@@ -139,7 +139,7 @@ public class Ventana2 extends javax.swing.JFrame {
                 }
                 
             } catch (HeadlessException e) {
-                // Manejar cualquier excepción durante la carga
+                // Maneja cualquier excepción durante la carga
                 JOptionPane.showMessageDialog(this, 
                     "Error inesperado al procesar el archivo:\n" + e.getMessage(),
                     "Error", 
@@ -147,7 +147,6 @@ public class Ventana2 extends javax.swing.JFrame {
             }
             
         } else if (resultado == JFileChooser.CANCEL_OPTION) {
-            // El usuario canceló la selección - no hacer nada
         } else {
             JOptionPane.showMessageDialog(this, 
                 "Error al abrir el selector de archivos.",

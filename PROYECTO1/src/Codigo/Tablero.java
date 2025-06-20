@@ -135,7 +135,7 @@ public class Tablero {
             }
         }
         
-        // Conectar casillas vecinas
+        // Conecta casillas vecinas
         for (int fila = 0; fila < TAMAÑO; fila++) {
             for (int col = 0; col < TAMAÑO; col++) {
                 int casilla = fila * TAMAÑO + col;
@@ -148,7 +148,7 @@ public class Tablero {
                         int nuevaFila = fila + df;
                         int nuevaCol = col + dc;
                         
-                        // Verificar que esté dentro del tablero
+                        // Verifica que esté dentro del tablero
                         if (nuevaFila >= 0 && nuevaFila < TAMAÑO && 
                             nuevaCol >= 0 && nuevaCol < TAMAÑO) {
                             

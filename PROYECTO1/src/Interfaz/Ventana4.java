@@ -82,6 +82,9 @@ public class Ventana4 extends javax.swing.JFrame {
         GUARDAR.setEnabled(false);
     }
     
+    /**
+     * Activa el modo de selección manual de letras
+     */
     private void activarModoSeleccion() {
         modoSeleccion = true;
         JOptionPane.showMessageDialog(this, "Modo de búsqueda activado. Ahora puedes seleccionar letras en el tablero.");
@@ -91,7 +94,7 @@ public class Ventana4 extends javax.swing.JFrame {
     }
     
     /**
-     * Desactiva el modo de selección manual
+     * Desactiva el modo de selección manual de letras
      */
     private void desactivarModoSeleccion() {
         modoSeleccion = false;
@@ -155,13 +158,11 @@ public class Ventana4 extends javax.swing.JFrame {
 
         boolean palabraDelDiccionario = esDelDiccionario(palabra);
 
-        // Agregar la palabra a encontradas (sea del diccionario o no)
         encontradas.add(palabra);
         caminosEncontrados.add(new ArrayList<>(seleccion));
         ultimoCaminoEncontrado = new ArrayList<>(seleccion); 
         ultimaPalabraEncontrada = palabra; 
 
-        // Colorear las casillas según si es del diccionario o no
         for (int casilla : seleccion) {
             int[] pos = tablero.getPosicion(casilla);
             if (palabraDelDiccionario) {
@@ -171,10 +172,8 @@ public class Ventana4 extends javax.swing.JFrame {
             }
         }
 
-        // Actualizar la lista visual
         actualizarEncontradas();
 
-        // Mostrar mensaje apropiado
         String mensaje;
         if (palabraDelDiccionario) {
             mensaje = "¡Encontraste una palabra del diccionario: " + palabra + "!";
@@ -202,7 +201,6 @@ public class Ventana4 extends javax.swing.JFrame {
         int[] pos = tablero.getPosicion(casilla);
         Color colorActual = botonesTablero[pos[0]][pos[1]].getBackground();
         
-        // Solo cambiar a blanco si no es verde (diccionario) ni cyan (palabra nueva)
         if (!colorActual.equals(Color.GREEN) && !colorActual.equals(Color.CYAN)) {
             botonesTablero[pos[0]][pos[1]].setBackground(Color.WHITE);
             }
@@ -292,7 +290,6 @@ public class Ventana4 extends javax.swing.JFrame {
             return true;
         }
         
-        // Buscar en 8 direcciones
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (i != 0 || j != 0) {
