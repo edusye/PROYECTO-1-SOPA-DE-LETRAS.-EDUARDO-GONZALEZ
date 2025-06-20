@@ -11,6 +11,10 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.File;
 
 /**
  * Ventana que muestra el tablero de sopa de letras y permite la interacción del usuario.
@@ -26,6 +30,8 @@ public class Ventana4 extends javax.swing.JFrame {
     private boolean palabraEncontradaEnBusqueda;
     private ArrayList<Integer> ultimoCaminoEncontrado; 
     private String ultimaPalabraEncontrada;
+    private ArrayList<String> palabrasNoEnDiccionario;
+    private String rutaArchivoDatos;
     
     /**
      * Constructor de la ventana
@@ -40,6 +46,8 @@ public class Ventana4 extends javax.swing.JFrame {
         this.palabraEncontradaEnBusqueda = false; 
         this.ultimoCaminoEncontrado = new ArrayList<>(); 
         this.ultimaPalabraEncontrada = "";
+        this.palabrasNoEnDiccionario = new ArrayList<>();
+        this.rutaArchivoDatos = null;
         initComponents();
         configurar();
     }
@@ -162,6 +170,12 @@ public class Ventana4 extends javax.swing.JFrame {
         caminosEncontrados.add(new ArrayList<>(seleccion));
         ultimoCaminoEncontrado = new ArrayList<>(seleccion); 
         ultimaPalabraEncontrada = palabra; 
+        
+        if (!palabraDelDiccionario) {
+        if (!palabrasNoEnDiccionario.contains(palabra)) {
+            palabrasNoEnDiccionario.add(palabra);
+        }
+    }
 
         for (int casilla : seleccion) {
             int[] pos = tablero.getPosicion(casilla);
@@ -192,7 +206,7 @@ public class Ventana4 extends javax.swing.JFrame {
         desactivarModoSeleccion();
         limpiar();
     }
-
+    
     /**
      * Limpia la selección actual
      */
@@ -207,7 +221,92 @@ public class Ventana4 extends javax.swing.JFrame {
         }
         seleccion.clear();
     }
+    
+    
+    private void guardarPalabrasNoEnDiccionario() {
+        if (palabrasNoEnDiccionario.isEmpty()) {
+        JOptionPane.showMessageDialog(this, 
+            "No hay palabras nuevas para guardar.", 
+            "Información", 
+            JOptionPane.INFORMATION_MESSAGE);
+        return;
+    }
 
+    if (rutaArchivoDatos == null || rutaArchivoDatos.isEmpty()) {
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Seleccionar archivo donde guardar las palabras nuevas");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
+            }
+
+            @Override
+            public String getDescription() {
+                return "Archivos de texto (*.txt)";
+            }
+        });
+
+        int result = fileChooser.showSaveDialog(this);
+        if (result != javax.swing.JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        rutaArchivoDatos = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!rutaArchivoDatos.toLowerCase().endsWith(".txt")) {
+                rutaArchivoDatos += ".txt";
+            }
+        }
+
+        try {
+            // Leer todo el archivo como un String
+            StringBuilder contenido = new StringBuilder();
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(rutaArchivoDatos));
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                contenido.append(linea).append("\n");
+            }
+            reader.close();
+
+            // Crear el texto con las nuevas palabras
+            StringBuilder nuevasPalabras = new StringBuilder();
+            for (String palabra : palabrasNoEnDiccionario) {
+                nuevasPalabras.append(palabra.toUpperCase()).append("\n");
+            }
+            nuevasPalabras.append("/dic");
+
+            // Reemplazar "/dic" con las nuevas palabras + "/dic"
+            String nuevoContenido = contenido.toString().replace("/dic", nuevasPalabras.toString());
+
+            // Escribir el archivo completo
+            BufferedWriter writer = new BufferedWriter(new FileWriter(rutaArchivoDatos));
+            writer.write(nuevoContenido);
+            writer.close();
+
+            // Mostrar mensaje de éxito
+            String mensaje = "Se guardo " + palabrasNoEnDiccionario.size() + " palabra(s) nueva(s).\n\n";
+            mensaje += "Palabras agregadas:\n";
+            for (String palabra : palabrasNoEnDiccionario) {
+                mensaje += "• " + palabra + "\n";
+            }
+
+            JOptionPane.showMessageDialog(this, 
+                mensaje, 
+                "Palabras guardadas exitosamente", 
+                JOptionPane.INFORMATION_MESSAGE);
+
+            palabrasNoEnDiccionario.clear();
+            GUARDAR.setEnabled(false);
+            GUARDAR.setBackground(new Color(204, 204, 204));
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error al guardar las palabras: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
     /**
      * Verifica si una palabra está en el diccionario del tablero
      * @param palabra la palabra a verificar
@@ -588,6 +687,11 @@ public class Ventana4 extends javax.swing.JFrame {
         GUARDAR.setFont(new java.awt.Font("Colonna MT", 1, 18)); // NOI18N
         GUARDAR.setText("GUARDAR");
         GUARDAR.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        GUARDAR.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                GUARDARMouseClicked(evt);
+            }
+        });
         jPanel1.add(GUARDAR, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 450, -1, -1));
 
         VERARBOL.setBackground(new java.awt.Color(204, 204, 204));
@@ -678,6 +782,11 @@ public class Ventana4 extends javax.swing.JFrame {
                 JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_VERARBOLMouseClicked
+
+    private void GUARDARMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GUARDARMouseClicked
+        // TODO add your handling code here:
+        guardarPalabrasNoEnDiccionario();
+    }//GEN-LAST:event_GUARDARMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
