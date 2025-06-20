@@ -58,8 +58,6 @@ public class Ventana5 extends javax.swing.JFrame {
             char letra = tablero.getLetraCasilla(camino.get(i));
             Node nodo = grafo.addNode("" + i);
             nodo.setAttribute("ui.label", "" + letra);
-            
-            // Centra en el panel y hace los espacios verticalmente
             double y = (camino.size() / 2.0 - i) * 1.5; 
             nodo.setAttribute("xy", 0, y);
         }

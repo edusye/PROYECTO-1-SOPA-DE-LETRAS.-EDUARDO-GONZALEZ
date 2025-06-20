@@ -222,7 +222,9 @@ public class Ventana4 extends javax.swing.JFrame {
         seleccion.clear();
     }
     
-    
+    /**
+     * Guarda las palabras encontradas que no estan en el diccionario
+     */
     private void guardarPalabrasNoEnDiccionario() {
         if (palabrasNoEnDiccionario.isEmpty()) {
         JOptionPane.showMessageDialog(this, 
@@ -259,7 +261,6 @@ public class Ventana4 extends javax.swing.JFrame {
         }
 
         try {
-            // Leer todo el archivo como un String
             StringBuilder contenido = new StringBuilder();
             java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(rutaArchivoDatos));
             String linea;
@@ -268,22 +269,18 @@ public class Ventana4 extends javax.swing.JFrame {
             }
             reader.close();
 
-            // Crear el texto con las nuevas palabras
             StringBuilder nuevasPalabras = new StringBuilder();
             for (String palabra : palabrasNoEnDiccionario) {
                 nuevasPalabras.append(palabra.toUpperCase()).append("\n");
             }
             nuevasPalabras.append("/dic");
 
-            // Reemplazar "/dic" con las nuevas palabras + "/dic"
             String nuevoContenido = contenido.toString().replace("/dic", nuevasPalabras.toString());
 
-            // Escribir el archivo completo
             BufferedWriter writer = new BufferedWriter(new FileWriter(rutaArchivoDatos));
             writer.write(nuevoContenido);
             writer.close();
 
-            // Mostrar mensaje de éxito
             String mensaje = "Se guardo " + palabrasNoEnDiccionario.size() + " palabra(s) nueva(s).\n\n";
             mensaje += "Palabras agregadas:\n";
             for (String palabra : palabrasNoEnDiccionario) {
@@ -320,9 +317,7 @@ public class Ventana4 extends javax.swing.JFrame {
         }
         return false;
     }
-    
-
-    
+        
     /**
      * Busca todas las palabras usando DFS
      */
@@ -531,7 +526,7 @@ public class Ventana4 extends javax.swing.JFrame {
     }
     
     /**
-     * Actualiza la lista de palabras encontradas
+     * Actualiza la lista de palabras encontradas 
      */
     private void actualizarEncontradas() {
         String texto = "";
@@ -540,6 +535,7 @@ public class Ventana4 extends javax.swing.JFrame {
         }
         ENCONTRADAS.setText(texto);
     }
+    
     /**
     * Muestra los resultados de la búsqueda automática (DFS o BFS)
     * @param metodo el método usado (DFS o BFS)
@@ -782,7 +778,13 @@ public class Ventana4 extends javax.swing.JFrame {
                 JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_VERARBOLMouseClicked
-
+    
+    /**
+     * Maneja el evento de clic del botón GUARDAR.
+     * Guarda la palabra nueva encontrada en el tablero.
+     * 
+     * @param evt 
+    */
     private void GUARDARMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GUARDARMouseClicked
         // TODO add your handling code here:
         guardarPalabrasNoEnDiccionario();
